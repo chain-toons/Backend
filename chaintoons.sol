@@ -7,9 +7,10 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract NFTCardGame  {
 
-    uint256 public id; //total number of minted nfts
+    uint256 public cardid; //card if in collection
+    uint256 public mintedid; //total number of minted nfts
 
-    address[] public registereduseres; //all users must be in this array to participate in game
+    mapping(address => bool) public users; //all users must be here to participate in game
 
     struct card {
        string name;
@@ -33,11 +34,25 @@ contract NFTCardGame  {
         owner = msg.sender; // 'msg.sender' is sender of current call, contract deployer for a constructor
     }
 
+    //all players must first register through adduser function
+    function adduser() public {
+        require(!users[msg.sender], "User already registered");
+        users[msg.sender] = true;
+    }
+
+    //front can check whether user registered through this
+    function checkregistration(address _user) public view returns (bool) {
+        return users[_user];
+    }   
+
     //storing color and metadata as string might be expensive
+    //thus we do not store new card but just record that a particular nft id references a stored card
     function addCard(string memory _name, uint256 _points, string memory _color, string memory _metadataURI) public onlyOwner {
         card memory newCard = card(_name, _points, _color, _metadataURI);
-        cardslibrary[id] = newCard;
-        id++;
+        cardslibrary[cardid] = newCard;
+        cardid++;
     }
+
+
 
 }
