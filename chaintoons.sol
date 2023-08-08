@@ -26,6 +26,7 @@ contract NFTCardGame is ERC721URIStorage {
     function adduser() public {
         require(!users[msg.sender], "User already registered");
         users[msg.sender] = true;
+        //need to add logic to mint starting cards for user
     }
 
     //front can check whether user registered through this
