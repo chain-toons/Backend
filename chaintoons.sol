@@ -3,25 +3,13 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 
-contract NFTCardGame  {
+contract NFTCardGame is ERC721URIStorage {
 
-    uint256 public cardid; //card if in collection
-    uint256 public mintedid; //total number of minted nfts
+    uint256 public cardid; //card id in collection
 
     mapping(address => bool) public users; //all users must be here to participate in game
-
-    struct card {
-       string name;
-       uint points;
-       string color; //eight colors allowed
-       string metadataURI; //link to wherever card is stored
-    }
-
-    mapping(uint256 => card) public cardslibrary; //info on all cards is stored here, id refers to each nft minted
-
-    mapping(uint256 => uint256) public mintedcards; //each minted card points to a specific card id stored in library, gas savings
 
     address private owner;
 
@@ -30,7 +18,7 @@ contract NFTCardGame  {
         _;
     }    
 
-    constructor() {
+    constructor(string memory _name, string memory _symbol) ERC721(_name, _symbol) {
         owner = msg.sender; // 'msg.sender' is sender of current call, contract deployer for a constructor
     }
 
@@ -45,14 +33,15 @@ contract NFTCardGame  {
         return users[_user];
     }   
 
-    //storing color and metadata as string might be expensive
-    //thus we do not store new card but just record that a particular nft id references a stored card
-    function addCard(string memory _name, uint256 _points, string memory _color, string memory _metadataURI) public onlyOwner {
-        card memory newCard = card(_name, _points, _color, _metadataURI);
-        cardslibrary[cardid] = newCard;
+    //framework for minting a card, all card info is in metadata under _tokenURI
+    function mintcard(address _recipient, string memory _tokenURI)  public onlyOwner {
+        _safeMint(_recipient, cardid);
+        _setTokenURI(cardid, _tokenURI);
         cardid++;
+    }    
+
+    function getTokenMetadata(uint256 _tokenId) public view returns (string memory) {
+        return tokenURI(_tokenId);
     }
-
-
 
 }
