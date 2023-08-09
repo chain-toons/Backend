@@ -2,8 +2,9 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+//import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 contract NFTCardGame is ERC721URIStorage {
 
@@ -18,6 +19,9 @@ contract NFTCardGame is ERC721URIStorage {
         _;
     }    
 
+    event UserRegistered(address indexed user);
+    event CardMinted(address indexed recipient, uint256 tokenId, string tokenURI);
+
     constructor(string memory _name, string memory _symbol) ERC721(_name, _symbol) {
         owner = msg.sender; // 'msg.sender' is sender of current call, contract deployer for a constructor
     }
@@ -26,7 +30,7 @@ contract NFTCardGame is ERC721URIStorage {
     function adduser() public {
         require(!users[msg.sender], "User already registered");
         users[msg.sender] = true;
-        //need to add logic to mint starting cards for user
+        emit UserRegistered(msg.sender);
     }
 
     //front can check whether user registered through this
@@ -39,8 +43,10 @@ contract NFTCardGame is ERC721URIStorage {
         _safeMint(_recipient, cardid);
         _setTokenURI(cardid, _tokenURI);
         cardid++;
+        emit CardMinted(_recipient, cardid, _tokenURI);
     }    
 
+    //retrieves metadata per minted token
     function getTokenMetadata(uint256 _tokenId) public view returns (string memory) {
         return tokenURI(_tokenId);
     }
